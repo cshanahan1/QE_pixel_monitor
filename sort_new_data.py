@@ -35,8 +35,9 @@ def info_new_files(new_files):
     for f in new_files:
         hdr = fits.open(f)[0].header 
         filter_name = hdr['FILTER']
+        prop_id = hdr['PROPOSID']
         #print f, filter_name
-        new_files_info.append((f,filter_name))
+        new_files_info.append((f,filter_name,str(prop_id)))
             
     return new_files_info
 
@@ -52,11 +53,11 @@ def sort_files(new_files_info,data_dir):
     """
     
     for f in new_files_info:
-        fname, filter_name = f[0], f[1]
-        dest = data_dir + '/{}'.format(filter_name)
+        fname, filter_name, proposid = f[0], f[1], f[2]
+        dest = data_dir + '/{}/{}'.format(proposid,filter_name)
         if not os.path.isdir(dest):
             print 'Making directory ' + dest
-            os.mkdir(dest)
+            os.makedirs(dest)
         shutil.move(fname, dest)
         print 'Moving ' + os.path.basename(fname) + ' to ' + dest
     

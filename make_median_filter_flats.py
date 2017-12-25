@@ -12,7 +12,9 @@ def write_temp_split_files(ifiles):
         
         Full frame UVIS images are split into 8 pieces, each chip into quarters."""
         
-    for ifile in ifiles:
+    for fnumber, ifile in enumerate(ifiles):
+    
+        print fnumber,'of',len(ifiles)
         
         sci_arrays, dq_arrays = open_fits(ifile,[1,2],DQ = True)
         ch1, ch2 = sci_arrays[0],sci_arrays[1]
@@ -55,20 +57,31 @@ def write_temp_split_files(ifiles):
             else:
                 pass
                 #print 'temp file already exists'
-                
-            
+
+def log_file_names(ifile_paths,log_file_outfile_path):
+    """Creates a log file of the rootnames of files that went in to making the meadian
+        flat for each filter."""
+        
+    rootnames = [os.path.basename(f) for f in ifile_paths]
+        
+    print 'Logging files used to create median flat.'
+    with open(log_file_outfile_path,'a') as f:
+        for rootname in rootnames:
+            f.write(rootname+'\n')
+                   
 def remove_temp_files():
     pass
             
-def main_make_median_flats(data_dir):
+def main_make_median_flats(data_dir,min_mjd,max_mjd):
 
     dirs = glob.glob(data_dir+'/*')
-    print 'dirs',dirs
+    
     filters = [os.path.basename(item) for item in dirs]
     
-    
     for i, filt in enumerate(filters):
+    
         ifiles = glob.glob(dirs[i]+'/*/*/*flt.fits')
+        
         print 'dirs[i]',dirs[i]
         if len(ifiles) > 0:
             if len(ifiles) < 150:
@@ -112,18 +125,28 @@ def main_make_median_flats(data_dir):
                 #remove temporary files 
                 print 'Removing temporary spliced files'
                 all_temp =ifiles_chip1A+ifiles_chip1B+ifiles_chip2A+ifiles_chip2B
+                print all_temp
                 
                 for item in all_temp:
                     os.remove(item)           
                 
             outfile_path = dirs[i]+'/combined_maskedDQ_flat_{}_median_flat.fits'.format(filt)
             print 'Writing out', outfile_path
+            
+            #make log of files that went into making median flat
+            log_file_outfile_path = dirs[i]+'median_flat_log_file.txt'
+            with open(log_file_outfile_path,'w') as f:
+                f.write('List of files used to create {}.'.format(log_file_outfile_path))
+            log_file_names(ifiles,log_file_outfile_path)
+
             write_full_frame_uvis_image(median_array_1,median_array_2,dq_array_1,dq_array_2,outfile_path)    
                 
 
 if __name__ == '__main__':
 
     data_dir = paths()['data_dir']
-    main_make_median_flats(data_dir)
+    min_mjd=1.
+    max_mjd = 2.
+    main_make_median_flats(data_dir,min_mjd,max_mjd)
     
 

@@ -5,30 +5,29 @@ import os
 from paths_and_params import paths
 import shutil
 
-def open_anneal_mjd_list():
+def open_anneal_mjd_list(anneal_info_dir):
 	
 	lines = []
-	with open('anneal_mjds.txt','r') as f:
+	with open(anneal_info_dir+'/anneal_mjds.txt','r') as f:
 		lines = f.readlines()
 		
 	return lines
 	
-def make_anneal_date_directories(filter_directories,anneal_mjds):
+def make_anneal_date_directories(proposal_subdir,anneal_mjds):
 
-	"""In each filter subdirectory, creates a directory for each anneal date if it 
-		doesn't exist already."""
+	"""For a filter/proposal ID subdirectory, creates a directory for each anneal date if 
+		it doesn't exist already."""
 		
-	for filter_directory in filter_directories:
-		for anneal_mjd in anneal_mjds:
-			if float(anneal_mjd) >= 56000: #roughly when earliest images were taken
-				date_subdir = filter_directory+'/'+anneal_mjd
-				if not os.path.isdir(date_subdir):
-					print 'Making directory ' + date_subdir
-					os.mkdir(date_subdir)
+	for anneal_mjd in anneal_mjds:
+		if float(anneal_mjd) >= 56000: #roughly when earliest images were taken
+			date_subdir = proposal_subdir+'/'+anneal_mjd
+			if not os.path.isdir(date_subdir):
+				print 'Making directory ' + date_subdir
+				os.mkdir(date_subdir)
 
-def get_mjd_from_files(filter_directory):
+def get_mjd_from_files(proposal_subdir):
 
-    files = glob.glob(filter_directory+'/*.fits')
+    files = glob.glob(proposal_subdir+'/*.fits')
     mjds = [] 
 
     for f in files:
@@ -58,36 +57,38 @@ def sort_files(file_paths,mjds,anneal_mjds):
 				print 'Moving ' + os.path.basename(file_path) + ' with an MJD of ' + str(mjd) + ' to ' + dest
 				shutil.move(file_path,dest)
 				
-				
-				
-def main_group_files_by_date(data_dir):
+def main_group_files_by_date(data_dir,anneal_info_dir,prop_ids):
 
-    filter_directories = glob.glob(data_dir+'/*')
-    
-    anneal_mjds = open_anneal_mjd_list()
+    anneal_mjds = open_anneal_mjd_list(anneal_info_dir)
     anneal_mjds = [item.replace('\n','') for item in anneal_mjds]
     
-    #make new date subdirectories 
-    make_anneal_date_directories(filter_directories,anneal_mjds)
+
+    filter_directories = glob.glob(data_dir+'/*')
+
     
     print 'Sorting files by anneal date...'
     for filter_directory in filter_directories:
+    	proposal_subdirs = glob.glob(filter_directory+'/*')
+    	for proposal_subdir in proposal_subdirs:
 
-        file_paths,mjds = get_mjd_from_files(filter_directory)
-        #print mjds
-        
-        #sort_files(file_paths,mjds,anneal_mjds)
-        
-        #remove empty dirs
-        
-        anneal_dirs = glob.glob(filter_directory+'/*')
-        
-        for dir in anneal_dirs:
-        	files_list = glob.glob(dir+'/*')
-        	print files_list
-        	if len(files_list) == 0:
-        		print 'removing',dir
-        		os.rmdir(dir)
+			#make new date subdirectories 
+			make_anneal_date_directories(proposal_subdir,anneal_mjds)
+
+			file_paths,mjds = get_mjd_from_files(proposal_subdir)
+			#print mjds
+	
+			sort_files(file_paths,mjds,anneal_mjds)
+	
+			#remove empty dirs
+	
+			anneal_dirs = glob.glob(filter_directory+'/*')
+	
+			for dir in anneal_dirs:
+				files_list = glob.glob(dir+'/*')
+				print files_list
+				if len(files_list) == 0:
+					print 'removing',dir
+					os.rmdir(dir)
 				
         	
           
@@ -95,6 +96,8 @@ if __name__ == '__main__':
 
     paths = paths()
     data_dir = paths['data_dir']
-    main_group_files_by_date(data_dir)
+    anneal_info_dir = paths['anneal_info_dir']
+    prop_ids = paths['prop_ids']
+    main_group_files_by_date(data_dir,anneal_info_dir,prop_ids)
     
 
