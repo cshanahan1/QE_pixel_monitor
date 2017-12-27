@@ -72,10 +72,16 @@ def log_file_names(ifile_paths,log_file_outfile_path):
 def remove_temp_files():
     pass
             
-def main_make_median_flats(data_dir,min_mjd,max_mjd):
+def main_make_median_flats(data_dir,prop_ids = 'all'):
 
     dirs = glob.glob(data_dir+'/*')
-    
+
+    if prop_ids != 'all':	
+    	for dir in dirs:
+    		for id in prop_ids:
+    			if str(id) not in dir:
+    				dirs.remove(dir)
+
     filters = [os.path.basename(item) for item in dirs]
     
     for i, filt in enumerate(filters):
