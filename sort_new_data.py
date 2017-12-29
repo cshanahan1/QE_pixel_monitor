@@ -1,96 +1,97 @@
-from astropy.io import fits 
+from astropy.io import fits
+from astropy.time import Time
 import glob
-from paths_and_params import *
 import os
+from paths_and_params import *
 import shutil
+    
+def open_anneal_mjd_list():
+    
+    anneal_mjds = []
+    with open('anneal_mjds.txt','r') as f:
+        anneal_mjds = f.readlines()
+     
+    anneal_mjds = [item.replace('\n','') for item in anneal_mjds]
+        
+    return anneal_mjds
+    
+def get_nearest_anneal_date(mjd,anneal_mjds):
+    
+    """ For a given MJD, finds the closest anneal date that it falls before.
+    
+        Parameters
+        ----------
+        mjd: float
+            MJD to compare list of anneal dates to
+        anneal_mjds: list of floats
+            list of UVIS anneal dates
+        
+        Returns
+        -------
+        nearest_anneal_mjd : float
+            For input MJD, the date of the nearest UVIS anneal that it falls before.
+        
+        """
 
-def get_new_files(new_data_dir):
-    """Obtains the full paths to all new _flt.fits files in the new_data directory.
-    
-        Parameters:
-            new_data_dir: string
-                Location of the directory where new data is placed.
-        Returns:
-            new_files : list of strings
-                List of paths of all _flt.fits files in the new_data directory.
-    """
-    
-    new_files = glob.glob(new_data_dir+'/*flt.fits')
-    
-    return new_files
+    anneal_mjds = ['0'] + anneal_mjds
 
-def info_new_files(new_files):
+    for i in range(len(anneal_mjds)-1):
+        if (mjd > float(anneal_mjds[i]))  & (mjd <= float(anneal_mjds[i+1])):
+            nearest_anneal_mjd = anneal_mjds[i+1]
+            return nearest_anneal_mjd
+                
+def get_info_new_files(new_files):
+
     """Opens up each new files and retrieves header information needed for sorting.
     
-        Parameters:
+        Parameters
+        ----------
             new_files : list of strings 
                 List of paths of all _flt.fits files in the new_data directory.
                 
-        Returns:
+        Returns
+        -------
             new_files_info : list of tuples
-                For each new file path, a tuple containint (file path, filter).
+                For each file path, a tuple containing 
+                (file_path, filter, proposal_id, nearest_anneal_mjd, date_obs(iso)).
         
         """
+    anneal_mjds = open_anneal_mjd_list()
     new_files_info = []
+    
     for f in new_files:
         hdr = fits.open(f)[0].header 
         filter_name = hdr['FILTER']
         prop_id = hdr['PROPOSID']
-        #print f, filter_name
-        new_files_info.append((f,filter_name,str(prop_id)))
+        date_obs = fits.open(f)[0].header['DATE-OBS']
+        t = Time(date_obs,format = 'iso')
+        #find nearest anneal date
+        nearest_anneal_mjd = get_nearest_anneal_date(t.mjd,anneal_mjds)
+        new_files_info.append((f,filter_name,str(prop_id),nearest_anneal_mjd,date_obs))
             
     return new_files_info
-
-def sort_files(new_files_info,data_dir):
-
-    """Sorts new files into subdirectories by filter. Creates filter subdirectory
-        if it does not exsit alread in the data directory (i.e first time running this).
     
-        Parameters:
-            new_files_info : list of tuples
-                For each new file path, a tuple containint (file path, filter).
+                
+def make_dirs_move_files(new_files_info,data_dir):
+    
+    for item in new_files_info:
+        file_path, filt, prop_id, nearest_anneal_mjd, date_obs = item
+        dest=data_dir+'/{0}/{1}/{2}/{3}'.format(filt,prop_id,nearest_anneal_mjd,date_obs)
         
-    """
-    
-    for f in new_files_info:
-        fname, filter_name, proposid = f[0], f[1], f[2]
-        dest = data_dir + '/{}/{}'.format(proposid,filter_name)
         if not os.path.isdir(dest):
-            print 'Making directory ' + dest
             os.makedirs(dest)
-        shutil.move(fname, dest)
-        print 'Moving ' + os.path.basename(fname) + ' to ' + dest
-    
+        
+        print 'moving',os.path.basename(file_path),'to',dest
+        shutil.move(file_path,dest)
 
-def main_sort_new_data(data_dir,new_data_dir):
-
-    new_files = get_new_files(new_data_dir)
-    print len(new_files), ' new files'
-    new_files_info = info_new_files(new_files)
-    sort_files(new_files_info,data_dir)
+def main_sort_new_data(paths):
     
+    new_data_dir,data_dir = paths['new_data_dir'],paths['data_dir']
+    new_files = glob.glob(new_data_dir+'/*flt.fits')
+    new_files_info = get_info_new_files(new_files)
+    make_dirs_move_files(new_files_info,data_dir)
     
-
-if __name__ == "__main__":
-    
+if __name__ == '__main__':
     paths = paths()
-    data_dir, new_data_dir = paths['data_dir'],paths['new_data_dir']
-    main_sort_new_data(data_dir,new_data_dir)
-    
-        
-    
-    
-    
-    
-                
-            
-        
-            
-            
-                
-    
-    
-    
-    
-    
-        
+    main_sort_new_data(paths)   
+
