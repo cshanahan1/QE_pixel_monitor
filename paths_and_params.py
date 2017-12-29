@@ -1,6 +1,6 @@
 def paths():
 
-    base_path = '/grp/hst/wfc3t/cshanahan/QE_pixel_monitor/'
+    base_path = '/Users/cshanahan/Desktop/work_at_airport/'
     dict = {'prop_ids':[13169,13585,14027,14389,14546],
             'data_dir': base_path+'data',
             'new_data_dir': base_path+'new_data',

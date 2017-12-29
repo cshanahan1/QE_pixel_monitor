@@ -3,6 +3,8 @@ import glob
 import os 
 from paths_and_params import paths
 from QE_pixel_tools import *
+#5 files from 13585
+#2 files from 13169
 
 def write_temp_split_files(ifiles):
     """To avoid running out of memory, when trying to combine more than ~150 images,
@@ -74,27 +76,34 @@ def remove_temp_files():
     pass
             
 def main_make_median_flats(data_dir,prop_ids = 'all'):
-    print prop_ids
-
-    dirs = glob.glob(data_dir+'/*/*')
-    dirs_filtered =[]
     
-    if prop_ids != 'all':
+    if prop_ids == 'all':
+        print 'Making median filter flat from all proposals.'
+        dirs = glob.glob(data_dir+'/*/*/*/*')
+    
+    else:
+        print 'Making median filter flat from proposals ', prop_ids
+        dirs = []
         for id in prop_ids:
-            for dir in dirs:
-                if str(id) in dir:
-                    dirs_filtered.append(dir)
-        dirs = dirs_filtered
+            dirs += glob.glob(data_dir+'/'+(str(id))+'/*/*/*')
+
     
     filters = [os.path.basename(item) for item in dirs]
 
     for i, filt in enumerate(filters):
     
-    	print dirs[i]
-        ifiles = glob.glob(dirs[i]+'/*/*/*')
+        print 'filt',filt
+    
+        print dirs[i]
+        
+        ifiles = []
+        for dir in dirs:
+            if filt in dir:
+                ifiles += glob.glob(dir+'/*/*/*')
+        print ifiles
         
         
-        if len(ifiles) > 0:
+        """if len(ifiles) > 0:
             if len(ifiles) < 150:
                 print 'Making median filter flat for ' + filt +'. Using {} files'.format(len(ifiles))
                 sci_arrays,dq_arrays = make_avg_flat_array(ifiles,'median',[1,2],combine_dq_arrays = True,mask_dq_each = False)
@@ -158,7 +167,7 @@ def main_make_median_flats(data_dir,prop_ids = 'all'):
                 f.write('List of files used to create {}.'.format(log_file_outfile_path))
             log_file_names(ifiles,log_file_outfile_path)
 
-            write_full_frame_uvis_image(median_array_1,median_array_2,dq_array_1,dq_array_2,outfile_path)
+            write_full_frame_uvis_image(median_array_1,median_array_2,dq_array_1,dq_array_2,outfile_path)"""
                 
 
 if __name__ == '__main__':
