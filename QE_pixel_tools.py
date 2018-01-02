@@ -110,12 +110,12 @@ def make_avg_flat_array(ifiles,avg_type,chips,combine_dq_arrays = False, mask_dq
 
   #make average image (median or mean)
     if avg_type == 'median':
-        print 'computing median of {} images...'.format(str(len(ifiles)))
+        print('computing median of {} images...'.format(str(len(ifiles))))
         median_arrs = [np.median(arr, axis=0) for arr in avg_array_chips]
         return (median_arrs,DQ_array_chips)
 
     if avg_type == 'mean':
-        print 'computing mean of {} images'.format(str(len(ifiles)))
+        print('computing mean of {} images'.format(str(len(ifiles))))
 
         mean_arrs = [np.mean(arr, axis=0) for arr in avg_array_chips]
 
@@ -123,7 +123,7 @@ def make_avg_flat_array(ifiles,avg_type,chips,combine_dq_arrays = False, mask_dq
 
             
     else:
-        print "Please specify method of average ('mean' or 'median')."
+        print("Please specify method of average ('mean' or 'median').")
     
     
 def write_full_frame_uvis_image(sci_array_chip1, sci_array_chip2, dq_array_chip1,

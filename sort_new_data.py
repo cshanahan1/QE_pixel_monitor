@@ -6,6 +6,8 @@ from paths_and_params import *
 import shutil
     
 def open_anneal_mjd_list():
+
+    """Opens anneal_mjds.txt and returns a list of anneal dates (in MJD)."""
     
     anneal_mjds = []
     with open('anneal_mjds.txt','r') as f:
@@ -73,6 +75,21 @@ def get_info_new_files(new_files):
     
                 
 def make_dirs_move_files(new_files_info,data_dir):
+
+    """Opens up each new files and retrieves header information needed for sorting.
+    
+        Parameters
+        ----------
+            new_files : list of strings 
+                List of paths of all _flt.fits files in the new_data directory.
+                
+        Returns
+        -------
+            new_files_info : list of tuples
+                For each file path, a tuple containing 
+                (file_path, filter, proposal_id, nearest_anneal_mjd, date_obs(iso)).
+        
+        """
     
     for item in new_files_info:
         file_path, filt, prop_id, nearest_anneal_mjd, date_obs = item
@@ -81,10 +98,11 @@ def make_dirs_move_files(new_files_info,data_dir):
         if not os.path.isdir(dest):
             os.makedirs(dest)
         
-        print 'moving',os.path.basename(file_path),'to',dest
+        print('moving',os.path.basename(file_path),'to',dest)
         shutil.move(file_path,dest)
 
 def main_sort_new_data(paths):
+
     
     new_data_dir,data_dir = paths['new_data_dir'],paths['data_dir']
     new_files = glob.glob(new_data_dir+'/*flt.fits')
@@ -92,6 +110,7 @@ def main_sort_new_data(paths):
     make_dirs_move_files(new_files_info,data_dir)
     
 if __name__ == '__main__':
+
     paths = paths()
     main_sort_new_data(paths)   
 
