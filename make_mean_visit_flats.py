@@ -17,8 +17,8 @@ def main_make_mean_visit_flats(data_dir):
         if len(ifiles) > 0:
             print('Making mean epoch flat for ' + filt+ ', visit date', visit_date)
             sci_arrays,dq_arrays = make_avg_flat_array(ifiles,'mean',[1,2],
-                                                       combine_dq_arrays = True,
-                                                       mask_dq_each = False)
+                                                       combine_dq_arrays = Fakse,
+                                                       mask_dq_each = True)
             mean_array_1, mean_array_2= sci_arrays[0],sci_arrays[1]
             dq_array_1,dq_array_2 = dq_arrays[0],dq_arrays[1]
             

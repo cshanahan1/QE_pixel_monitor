@@ -183,22 +183,22 @@ def main_make_median_flats(data_dir,prop_ids = 'all'):
                 ifiles_chip2D = glob.glob(dirs[i]+'/*/*/*chip2_D*.temp')
                 
                 m1A,dq1A = make_avg_flat_array(ifiles_chip1A,'median',[1],
-                           combine_dq_arrays = True,mask_dq_each = False)
+                           combine_dq_arrays = False,mask_dq_each = True)
                 m1B,dq1B= make_avg_flat_array(ifiles_chip1B,'median',[1],
-                          combine_dq_arrays = True,mask_dq_each = False)
+                          combine_dq_arrays = False,mask_dq_each = True)
                 m1C,dq1C= make_avg_flat_array(ifiles_chip1C,'median',[1],
-                          combine_dq_arrays = True,mask_dq_each = False)
+                          combine_dq_arrays = False,mask_dq_each = True)
                 m1D,dq1D= make_avg_flat_array(ifiles_chip1D,'median',[1],
-                          combine_dq_arrays = True,mask_dq_each = False)
+                          combine_dq_arrays = False,mask_dq_each = True)
                 
                 m2A,dq2A = make_avg_flat_array(ifiles_chip2A,'median',[2],
-                           combine_dq_arrays = True,mask_dq_each = False)
+                           combine_dq_arrays = False,mask_dq_each = True)
                 m2B,dq2B = make_avg_flat_array(ifiles_chip2B,'median',[2],
-                           combine_dq_arrays = True,mask_dq_each = False)
+                           combine_dq_arrays = False,mask_dq_each = True)
                 m2C,dq2C = make_avg_flat_array(ifiles_chip2C,'median',[2],
-                           combine_dq_arrays = True,mask_dq_each = False)
+                           combine_dq_arrays = False,mask_dq_each = True)
                 m2D,dq2D = make_avg_flat_array(ifiles_chip2D,'median',[2],
-                           combine_dq_arrays = True,mask_dq_each = False)
+                           combine_dq_arrays = False,mask_dq_each = True)
 
                 #recombine to full frame to write out 
                 median_array_1 = np.hstack((np.vstack((m1A[0],m1C[0])),
